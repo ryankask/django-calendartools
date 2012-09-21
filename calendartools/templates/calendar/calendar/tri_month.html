@@ -19,12 +19,12 @@
 {% endblock %}
 
 {% block agenda_url %}
-{% url tri-month-agenda calendar.slug tri_month.second_month.year tri_month.second_month.abbr as agenda_url %}
+{% url 'tri-month-agenda' calendar.slug tri_month.second_month.year tri_month.second_month.abbr as agenda_url %}
 {{ agenda_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
 {% block current_nav_url %}
-{% url tri-month-calendar calendar.slug today.year today.get_month.abbr as current_nav_url %}
+{% url 'tri-month-calendar' calendar.slug today.year today.get_month.abbr as current_nav_url %}
 {{ current_nav_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
@@ -39,7 +39,7 @@
       {% for month in tri_month %}
       <td class="month-cell">
         <a class="month name month{{ forloop.counter }}"
-           href="{% url month-calendar calendar.slug month.year month.abbr %}">
+           href="{% url 'month-calendar' calendar.slug month.year month.abbr %}">
           <span>{{ month.name }}</span>
         </a>
         <table class="tri-month-view month calendar small calendar-{{ forloop.counter }} {% cycle "" "alt" %}">

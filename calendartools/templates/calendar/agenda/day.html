@@ -10,12 +10,12 @@
 {% endblock %}
 
 {% block calendar_url %}
-{% url day-calendar calendar.slug day.year day.get_month.abbr day.number as calendar_url %}
+{% url 'day-calendar' calendar.slug day.year day.get_month.abbr day.number as calendar_url %}
 {{ calendar_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
 {% block current_nav_url %}
-{% url day-agenda calendar.slug today.year today.get_month.abbr today.number as current_nav_url %}
+{% url 'day-agenda' calendar.slug today.year today.get_month.abbr today.number as current_nav_url %}
 {{ current_nav_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 

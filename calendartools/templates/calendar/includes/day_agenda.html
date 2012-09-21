@@ -3,7 +3,7 @@
       {% if day.occurrences %}
         <tr class="day-divider {{ day.name|notrans|lower }}">
           <th class="start date" rowspan="{{ day.occurrences|length }}">
-            <a href="{% url day-agenda calendar.slug day.year day.get_month.abbr day.number %}">
+            <a href="{% url 'day-agenda' calendar.slug day.year day.get_month.abbr day.number %}">
               {{ day|date:"DATE_FORMAT" }}
             </a>
           </th>

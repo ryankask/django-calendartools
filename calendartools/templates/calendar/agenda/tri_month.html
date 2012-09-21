@@ -19,12 +19,12 @@
 {% endblock %}
 
 {% block calendar_url %}
-{% url tri-month-calendar calendar.slug tri_month.second_month.year tri_month.second_month.abbr as calendar_url %}
+{% url 'tri-month-calendar' calendar.slug tri_month.second_month.year tri_month.second_month.abbr as calendar_url %}
 {{ calendar_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
 {% block current_nav_url %}
-{% url tri-month-agenda calendar.slug today.year today.get_month.abbr as current_nav_url %}
+{% url 'tri-month-agenda' calendar.slug today.year today.get_month.abbr as current_nav_url %}
 {{ current_nav_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
@@ -72,4 +72,3 @@
 </table>
 {% endif %}
 {% endblock %}
-

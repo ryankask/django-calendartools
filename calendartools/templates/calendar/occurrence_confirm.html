@@ -22,7 +22,7 @@
   </ul>
   {% endif %}
 
-  <form method="post" action="{% url confirm-occurrences %}">{% csrf_token %}
+  <form method="post" action="{% url 'confirm-occurrences' %}">{% csrf_token %}
     <table>
     {{ form.as_table }}
     <tr>
@@ -32,6 +32,3 @@
     </table>
   </form>
 {% endblock %}
-
-
-

@@ -1,7 +1,7 @@
 {% load calendartools_tags %}
 
       {% if month.occurrences %}
-        {% url month-agenda calendar.slug month.year month.abbr as month_url %}
+        {% url 'month-agenda' calendar.slug month.year month.abbr as month_url %}
         <tr class="month-divider {{ month.abbr|notrans|lower }}">
           <th class="month start date" rowspan="{{ month.occurrences|length }}">
             <a href="{{ month_url|persist_query_string|delete_query_string:"page" }}">
@@ -13,7 +13,7 @@
         {% for o in day.occurrences %}
         {% if forloop.first %}
           <td class="day start date" rowspan="{{ day.occurrences|length }}">
-            {% url day-agenda calendar.slug day.year day.get_month.abbr day.number as day_url %}
+            {% url 'day-agenda' calendar.slug day.year day.get_month.abbr day.number as day_url %}
             <a href="{{ day_url|persist_query_string|delete_query_string:"page" }}">
               {{ day|date:"DATE_FORMAT" }}
             </a>

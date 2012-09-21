@@ -12,12 +12,12 @@
 {% endblock %}
 
 {% block agenda_url %}
-{% url week-agenda calendar.slug week.year week.number as agenda_url %}
+{% url 'week-agenda' calendar.slug week.year week.number as agenda_url %}
 {{ agenda_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
 {% block current_nav_url %}
-{% url week-calendar calendar.slug today.year today.get_week.number as current_nav_url %}
+{% url 'week-calendar' calendar.slug today.year today.get_week.number as current_nav_url %}
 {{ current_nav_url|persist_query_string|delete_query_string:"page" }}
 {% endblock %}
 
@@ -46,7 +46,7 @@
         <th>&nbsp;</th>
         {% for day in week.days %}
         <th{% if day == today %} class="today"{% endif %}>
-          {% url day-calendar calendar.slug day.year day.get_month.abbr day.number as day_url %}
+          {% url 'day-calendar' calendar.slug day.year day.get_month.abbr day.number as day_url %}
           <a href="{{ day_url|persist_query_string }}">
             {{ day.name }} {{ day|date:"jS" }}
           </a>
