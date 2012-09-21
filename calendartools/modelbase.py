@@ -1,3 +1,5 @@
+from functools import partial
+
 from dateutil import rrule
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
@@ -11,11 +13,6 @@ from calendartools import defaults
 from calendartools.exceptions import MaxOccurrenceCreationsExceeded
 from calendartools.signals import collect_validators
 from calendartools.modelproxy import LocalizedOccurrenceProxy
-
-try:
-    from functools import partial
-except ImportError: # Python 2.3, 2.4 fallback.
-    from django.utils.functional import curry as partial
 
 from model_utils import Choices
 from model_utils.fields import StatusField

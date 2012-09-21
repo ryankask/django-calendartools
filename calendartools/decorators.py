@@ -1,10 +1,7 @@
+from functools import wraps
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-
-try:
-    from functools import wraps
-except ImportError: # Python 2.3, 2.4 fallback.
-    from django.utils.functional import wraps
 
 def get_occurrence_data_from_session(view):
     @wraps(view)

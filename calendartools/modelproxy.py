@@ -1,12 +1,8 @@
+from functools import partial
 from calendartools.periods.proxybase import LocalizedSimpleProxy
 from django.conf import settings
 from timezones.utils import localtime_for_timezone
 import pytz
-
-try:
-    from functools import partial
-except ImportError: # Python 2.3, 2.4 fallback.
-    from django.utils.functional import curry as partial
 
 
 class LocalizedOccurrenceProxy(LocalizedSimpleProxy):

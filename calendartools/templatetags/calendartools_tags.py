@@ -107,12 +107,7 @@ do_no_translation.is_safe = True
 register.tag('notrans', force_no_translation)
 register.filter('notrans', do_no_translation)
 
-
-from urlparse import urlparse
-try:
-    from urlparse import parse_qs
-except ImportError:
-    from cgi import parse_qs
+from urlparse import urlparse, parse_qs
 from urllib import urlencode
 
 @register.filter(name='clear_query_string')
