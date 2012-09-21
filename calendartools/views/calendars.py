@@ -8,7 +8,7 @@ from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils import formats
-from django.views.generic import list_detail
+from django.views.generic import ListView
 
 from calendartools import defaults
 from calendartools.periods import Year, TripleMonth, Month, Week, Day
@@ -23,11 +23,11 @@ Calendar = get_model(defaults.CALENDAR_APP_LABEL, 'Calendar')
 Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence')
 
 def calendar_list(request, *args, **kwargs):
-    kwargs.update({
+    info = {
         'queryset': Calendar.objects.visible(request.user),
         'template_name': 'calendar/calendar_list.html'
-    })
-    return list_detail.object_list(request, *args, **kwargs)
+    }
+    return ListView.as_view(**info)(request, *args, **kwargs)
 
 def calendar_detail(request, slug, *args, **kwargs):
     calendar = get_object_or_404(Calendar.objects.visible(request.user), slug=slug)
