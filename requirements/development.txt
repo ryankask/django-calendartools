@@ -1,1 +1,2 @@
 NoseDjango==0.8.1
+ipdb=0.7
