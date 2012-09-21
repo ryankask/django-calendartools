@@ -57,13 +57,15 @@ DEFAULT_VALIDATORS = [
 ]
 
 def activate_default_occurrence_validators():
-    Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence')
+    Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence',
+                           only_installed=False)
 
     for validator in DEFAULT_VALIDATORS:
         signals.collect_validators.connect(validator, sender=Occurrence)
 
 def deactivate_default_occurrence_validators():
-    Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence')
+    Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence',
+                           only_installed=False)
 
     for validator in DEFAULT_VALIDATORS:
         signals.collect_validators.disconnect(validator, sender=Occurrence)

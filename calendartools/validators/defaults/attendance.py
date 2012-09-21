@@ -74,13 +74,15 @@ DEFAULT_VALIDATORS = [
 ]
 
 def activate_default_attendance_validators():
-    Attendance = get_model(defaults.CALENDAR_APP_LABEL, 'Attendance')
+    Attendance = get_model(defaults.CALENDAR_APP_LABEL, 'Attendance',
+                           only_installed=False)
 
     for validator in DEFAULT_VALIDATORS:
         signals.collect_validators.connect(validator, sender=Attendance)
 
 def deactivate_default_attendance_validators():
-    Attendance = get_model(defaults.CALENDAR_APP_LABEL, 'Attendance')
+    Attendance = get_model(defaults.CALENDAR_APP_LABEL, 'Attendance',
+                           only_installed=False)
 
     for validator in DEFAULT_VALIDATORS:
         signals.collect_validators.disconnect(validator, sender=Attendance)
