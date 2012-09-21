@@ -1,18 +1,18 @@
-import pytz
 from datetime import datetime
+
 from django.conf import settings
 from django.db.models import Max, Min
+from django.db.models.loading import get_model
 from django.http import Http404
 from django.shortcuts import get_object_or_404
-from calendartools import defaults, forms
-from calendartools.views.generic.base import TemplateResponseMixin
-from calendartools.views.generic.list import BaseListView
-from calendartools.views.generic.dates import (
-    DateMixin, _date_from_string
-)
+from django.views.generic.base import TemplateResponseMixin
+from django.views.generic.list import BaseListView
+from django.views.generic.dates import DateMixin, _date_from_string
 
-from django.db.models.loading import get_model
+import pytz
 from timezones.utils import adjust_datetime_to_timezone
+
+from calendartools import defaults, forms
 
 Calendar = get_model(defaults.CALENDAR_APP_LABEL, 'Calendar')
 Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence')

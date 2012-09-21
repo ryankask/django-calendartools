@@ -5,6 +5,7 @@ from calendartools.views.calendars import (
     YearView, TriMonthView, MonthView, WeekView, DayView
 )
 
+
 class YearAgenda(YearView):
     template_name = 'calendar/agenda/year.html'
     paginate_by = defaults.MAX_AGENDA_ITEMS_PER_PAGE
@@ -28,6 +29,7 @@ class WeekAgenda(WeekView):
 class DayAgenda(DayView):
     template_name = 'calendar/agenda/day.html'
     paginate_by = defaults.MAX_AGENDA_ITEMS_PER_PAGE
+
 
 def today_agenda(request, slug, *args, **kwargs):
     today = date.today()

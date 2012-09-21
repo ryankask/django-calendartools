@@ -1,23 +1,20 @@
 import calendar
-import time
 from datetime import date
+import time
 
 from dateutil.relativedelta import relativedelta
-
+from django.db.models.loading import get_model
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils import formats
 from django.views.generic import ListView
+from django.views.generic.dates import YearMixin, MonthMixin, WeekMixin, DayMixin
 
 from calendartools import defaults
 from calendartools.periods import Year, TripleMonth, Month, Week, Day
 from calendartools.views.base import CalendarViewBase
-from calendartools.views.generic.dates import (
-    YearMixin, MonthMixin, WeekMixin, DayMixin
-)
 from calendartools.utils import standardise_first_dow
-from django.db.models.loading import get_model
 
 Calendar = get_model(defaults.CALENDAR_APP_LABEL, 'Calendar')
 Occurrence = get_model(defaults.CALENDAR_APP_LABEL, 'Occurrence')
