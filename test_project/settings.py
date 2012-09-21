@@ -63,3 +63,5 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 ROOT_URLCONF = 'calendartools.urls'
+
+SECRET_KEY = 'jxv_@c5ll0w@i@fk1k*73&821at1w68!j&5*95c98$wi=^!xdi'
