@@ -8,3 +8,7 @@ tags
 .DS_Store
 ipython_log.py
 .vimrc
+*~
+\#*#
+.#*
+._*
