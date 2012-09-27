@@ -383,10 +383,7 @@ class TestAttendanceCancellation(TestCase):
         )
         assert_equal(Cancellation.objects.count(), 1)
         assert_equal(att.cancellation, Cancellation.objects.get())
-        assert_equal(
-            att.datetime_created.date(),
-            att.cancellation.datetime_created.date()
-        )
+        assert_equal(att.created.date(), att.cancellation.created.date())
 
     def test_attendance_record_cannot_be_uncancelled(self):
         att = Attendance.objects.create(

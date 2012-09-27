@@ -62,7 +62,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.admin',
 
-    'django_extensions',
     'calendartools',
     'event',
 )

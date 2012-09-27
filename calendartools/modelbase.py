@@ -5,9 +5,8 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db import models
 from django.db.models.loading import get_model
 from django.utils.translation import ugettext_lazy as _
-from django_extensions.db.fields import (
-    CreationDateTimeField, ModificationDateTimeField, AutoSlugField
-)
+
+from django_extensions.db.fields import AutoSlugField
 from threaded_multihost.fields import CreatorField, EditorField
 from calendartools import defaults
 from calendartools.exceptions import MaxOccurrenceCreationsExceeded
@@ -16,11 +15,10 @@ from calendartools.modelproxy import LocalizedOccurrenceProxy
 
 from model_utils import Choices
 from model_utils.fields import StatusField
+from model_utils.models import TimeStampedModel
 
 
-class AuditedModel(models.Model):
-    datetime_created  = CreationDateTimeField(_('Created'))
-    datetime_modified = ModificationDateTimeField(_('Last Modified'))
+class AuditedModel(TimeStampedModel):
     creator = CreatorField(related_name='%(class)ss_created')
     editor  = EditorField(related_name='%(class)ss_modified')
 
@@ -72,7 +70,7 @@ class CalendarBase(StatusBase):
     class Meta(object):
         verbose_name = _('Calendar')
         verbose_name_plural = _('Calendars')
-        get_latest_by = 'datetime_created'
+        get_latest_by = 'created'
         app_label = defaults.CALENDAR_APP_LABEL
         abstract = True
 
@@ -107,7 +105,7 @@ class EventBase(StatusBase):
     class Meta(object):
         verbose_name = _('Event')
         verbose_name_plural = _('Events')
-        get_latest_by = 'datetime_created'
+        get_latest_by = 'created'
         app_label = defaults.CALENDAR_APP_LABEL
         abstract = True
 
@@ -197,7 +195,7 @@ class OccurrenceBase(PluggableValidationMixin, StatusBase):
     class Meta(object):
         verbose_name = _('Occurrence')
         verbose_name_plural = _('Occurrences')
-        get_latest_by = 'datetime_created'
+        get_latest_by = 'created'
         app_label = defaults.CALENDAR_APP_LABEL
         abstract = True
 
@@ -248,7 +246,7 @@ class AttendanceBase(PluggableValidationMixin, AuditedModel):
     class Meta(object):
         verbose_name = _('Attendance Record')
         verbose_name_plural = _('Attendance Records')
-        get_latest_by = 'datetime_created'
+        get_latest_by = 'created'
         app_label = defaults.CALENDAR_APP_LABEL
         abstract = True
 
@@ -288,7 +286,7 @@ class CancellationBase(AuditedModel):
     class Meta(object):
         verbose_name = _('Attendance Cancellation')
         verbose_name_plural = _('Attendance Cancellations')
-        get_latest_by = 'datetime_created'
+        get_latest_by = 'created'
         app_label = defaults.CALENDAR_APP_LABEL
         abstract = True
 

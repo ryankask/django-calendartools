@@ -15,11 +15,12 @@ site_name_list.admin_order_field = "sites__domain"
 class CalendarSiteAdmin(CalendarAdmin):
     form = forms.AdminAddCalendarForm
     list_display = ['name', 'slug', 'description', 'status', site_name_list,
-                    'datetime_created']
+                    'created']
 
 
 class EventSiteAdmin(EventAdmin):
     form = forms.AdminAddEventForm
+
 
 admin.site.unregister(Calendar)
 admin.site.unregister(Event)
