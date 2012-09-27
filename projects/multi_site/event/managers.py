@@ -18,18 +18,18 @@ class CalendarSiteQuerySet(CommonSiteQuerySet, CalendarQuerySet):
     def visible(self, user=None):
         from calendartools.modelbase import StatusBase
         if user and defaults.view_hidden_calendars_check(user=user):
-            return self.on_site.filter(status__gte=StatusBase.HIDDEN)
+            return self.on_site.filter(status__gte=StatusBase.STATUS.hidden)
         else:
-            return self.on_site.filter(status__gte=StatusBase.CANCELLED)
+            return self.on_site.filter(status__gte=StatusBase.STATUS.cancelled)
 
 
 class EventSiteQuerySet(CommonSiteQuerySet, EventQuerySet):
     def visible(self, user=None):
         from calendartools.modelbase import StatusBase
         if user and defaults.view_hidden_events_check(user=user):
-            return self.on_site.filter(status__gte=StatusBase.HIDDEN)
+            return self.on_site.filter(status__gte=StatusBase.STATUS.hidden)
         else:
-            return self.on_site.filter(status__gte=StatusBase.CANCELLED)
+            return self.on_site.filter(status__gte=StatusBase.STATUS.cancelled)
 
 
 class OccurrenceSiteQuerySet(CommonSiteQuerySet, OccurrenceQuerySet):
@@ -37,13 +37,13 @@ class OccurrenceSiteQuerySet(CommonSiteQuerySet, OccurrenceQuerySet):
         from calendartools.modelbase import StatusBase
         qset = self.select_related('event', 'calendar').on_site
         if user and defaults.view_hidden_occurrences_check(user=user):
-            return (qset.filter(status__gte=StatusBase.HIDDEN) &
-                    qset.filter(event__status__gte=StatusBase.HIDDEN) &
-                    qset.filter(calendar__status__gte=StatusBase.HIDDEN))
+            return (qset.filter(status__gte=StatusBase.STATUS.hidden) &
+                    qset.filter(event__status__gte=StatusBase.STATUS.hidden) &
+                    qset.filter(calendar__status__gte=StatusBase.STATUS.hidden))
         else:
-            return (qset.filter(status__gte=StatusBase.CANCELLED) &
-                    qset.filter(event__status__gte=StatusBase.CANCELLED) &
-                    qset.filter(calendar__status__gte=StatusBase.CANCELLED))
+            return (qset.filter(status__gte=StatusBase.STATUS.cancelled) &
+                    qset.filter(event__status__gte=StatusBase.STATUS.cancelled) &
+                    qset.filter(calendar__status__gte=StatusBase.STATUS.cancelled))
 
     @property
     def on_site(self):
