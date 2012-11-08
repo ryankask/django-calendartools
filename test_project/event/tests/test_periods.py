@@ -1,7 +1,5 @@
 # -*- coding: UTF-8 -*-
-
 import calendar
-import pytz
 from datetime import datetime, date, time, timedelta
 from dateutil.rrule import rrule, MONTHLY, WEEKLY, HOURLY, DAILY
 
@@ -13,15 +11,12 @@ from django.utils import translation
 from django.test import TestCase
 from nose.tools import *
 
-from timezones.utils import adjust_datetime_to_timezone
-
 from calendartools import defaults
 from event.models import Calendar, Event, Occurrence
 from calendartools.periods import (
     SimpleProxy, Period, Year, Month, Week, Day, Hour, TripleMonth,
     first_day_of_week
 )
-from calendartools.modelproxy import LocalizedOccurrenceProxy
 from calendartools.validators.defaults.occurrence import (
     activate_default_occurrence_validators,
     deactivate_default_occurrence_validators
@@ -693,27 +688,6 @@ class TestDateTimeProxiesWithOccurrences(TestCase):
                             else:
                                 assert_equal(len(hour.occurrences), 2)
 
-    def test_occurrences_localized_correctly(self):
-        timezone = 'Antarctica/McMurdo'
-        occurrences = Occurrence.objects.all()
-        localized_year = Year(
-            self.start, occurrences=occurrences, timezone=timezone
-        )
-        assert_equal(localized_year.timezone, pytz.timezone(timezone))
-        assert self.year.timezone is None
-
-        for o in localized_year.occurrences:
-            assert isinstance(o, LocalizedOccurrenceProxy)
-        for localized_month, month in zip(localized_year, self.year):
-            for localized_o, o in zip(localized_month.occurrences, occurrences):
-                assert_equal(localized_o.real_start, o.start.replace(tzinfo=None))
-                assert_equal(localized_o.real_finish, o.finish.replace(tzinfo=None))
-                for attr in ('start', 'finish'):
-                    expected = adjust_datetime_to_timezone(
-                        getattr(o, attr), settings.TIME_ZONE, timezone
-                    )
-                    assert_equal(getattr(localized_o, attr), expected)
-
 
 class TestDateTimeProxiesWithLocalizedOccurrences(TestCase):
     def setUp(self):
@@ -753,19 +727,6 @@ class TestDateTimeProxiesWithLocalizedOccurrences(TestCase):
 
     def test_membership(self):
         assert_equal(len(self.week.occurrences), 2)
-
-    def test_localization(self):
-        occurrences = Occurrence.objects.all()
-        timezones = [
-            'Antarctica/McMurdo', # GMT + 1300
-            'Pacific/Midway',     # GMT - 1100
-        ]
-
-        for timezone in timezones:
-            localized_week = Week(
-                self.start, occurrences=occurrences, timezone=timezone
-            )
-            assert_equal(len(localized_week.occurrences), 1)
 
 
 class TestWeeksAttribute(TestCase):

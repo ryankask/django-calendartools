@@ -433,5 +433,4 @@ class ConfirmOccurrenceForm(OccurrenceBaseForm):
 
 
 class TimeZoneForm(forms.Form):
-
     timezone = TimeZoneField()

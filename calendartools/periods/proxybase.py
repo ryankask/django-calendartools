@@ -1,7 +1,3 @@
-from datetime import tzinfo
-import pytz
-
-
 class SimpleProxy(object):
     def __init__(self, obj, *args, **kwargs):
         self._obj = obj
@@ -38,19 +34,3 @@ class SimpleProxy(object):
                     self._obj, self, attr
                 )
                 raise AttributeError, e
-
-
-class LocalizedSimpleProxy(SimpleProxy):
-    def __init__(self, obj, *args, **kwargs):
-        super(LocalizedSimpleProxy, self).__init__(obj, *args, **kwargs)
-        timezone = kwargs.pop('timezone', None)
-        self.timezone = self.coerce_timezone_attr_to_timezone(timezone)
-
-    def coerce_timezone_attr_to_timezone(self, timezone):
-        timezone = timezone or ''
-        if isinstance(timezone, tzinfo):
-            return timezone
-        try:
-            return pytz.timezone(timezone)
-        except pytz.UnknownTimeZoneError:
-            pass

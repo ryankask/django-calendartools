@@ -10,7 +10,6 @@ from django.views.generic.list import BaseListView
 from django.views.generic.dates import DateMixin, _date_from_string
 
 import pytz
-from timezones.utils import adjust_datetime_to_timezone
 
 from calendartools import defaults, forms
 
@@ -76,9 +75,9 @@ class CalendarViewBase(DateMixin, BaseListView, TemplateResponseMixin):
         kwargs = self._get_kwargs_for_date_from_string()
         return _date_from_string(**kwargs)
 
-    def create_period_object(self, dt, occurrences, timezone):
+    def create_period_object(self, dt, occurrences):
         occurrences = occurrences or []
-        return self.period(dt, occurrences=occurrences, timezone=timezone)
+        return self.period(dt, occurrences=occurrences)
 
     def parse_filter_params(self):
         filter_params = {}
@@ -133,53 +132,10 @@ class CalendarViewBase(DateMixin, BaseListView, TemplateResponseMixin):
         return queryset
 
     def get_dated_queryset(self, order='asc', **lookup):
-        # Hmm... this next step is evidence of a current design flaw:
-        # while most filters will want to run *after* filtering on
-        # dates is completed, the timezone filter should run
-        # beforehand.
-
-        # Possible solutions:
-        # * Special case it?
-        # * Break away from the current Django class-based view API for using
-        #   get_dated_queryset, instead using something more sensible
-        #   to our needs?
-        # * Add in a mechanism for filters to run pre and post the
-        #   date filtering?
-
-        # Note: It *is* a special case in that it doesn't actually
-        # modify the queryset the same way as the other filters do,
-        # which is why we can pass it an empty list, as in this
-        # temporary fix...
-        timezone = self.filter_params.get('timezone')
-        if timezone:
-            self.apply_timezone_filter([], timezone)
-
-        d = self.date
-        date_field = self.get_date_field()
         qs = self.get_queryset().filter(**lookup)
-        period = self.period(d)
-
-        # Implementation 1:
-        # -----------------
-        # date_range = (period.start, period.finish)
-        # date_range = [adjust_datetime_to_timezone(
-        #              i, settings.TIME_ZONE, self.timezone) for i in date_range]
-        # date_range = [i.replace(tzinfo=None) for i in date_range]
-        # Issues: doesn't rotate time backwards properly, caching
-
-        # Implementation 2:
-        # -----------------
-        # date_range = (period.start - timedelta(1), period.finish + timedelta(1))
-        # Issues: pagination.
-
-        # Implementation 3:
-        # -----------------
-        date_range = (period.start, period.finish)
-        date_range = [adjust_datetime_to_timezone(
-                     dt, self.timezone, settings.TIME_ZONE) for dt in date_range]
-        date_range = [dt.replace(tzinfo=None) for dt in date_range]
-
-        filter_kwargs = {'%s__range' % date_field: date_range}
+        date_field = self.get_date_field()
+        period = self.period(self.date)
+        filter_kwargs = {'%s__range' % date_field: (period.start, period.finish)}
         order = '' if order == 'asc' else '-'
         return qs.filter(**filter_kwargs).order_by("%s%s" % (order, date_field))
 
@@ -201,15 +157,16 @@ class CalendarViewBase(DateMixin, BaseListView, TemplateResponseMixin):
             'calendar': self.calendar,
             'object_list': occurrences,
         })
-        self.period_object = self.create_period_object(
-            self.date, context['object_list'], timezone=self.timezone
-        )
+        self.period_object = self.create_period_object(self.date,
+                                                       context['object_list'])
         context.update(self.calendar_bounds)
         context[self.period_name] = self.period_object
 
         if kwargs.get('small'):
             context['size'] = 'small'
+
         context['timezone_form'] = forms.TimeZoneForm(
             initial={'timezone': self.timezone}
         )
+
         return self.render_to_response(context)

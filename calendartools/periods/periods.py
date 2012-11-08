@@ -10,7 +10,7 @@ from django.utils import formats
 from django.utils.translation import ugettext_lazy as _
 from django.utils.dates import MONTHS, MONTHS_3, WEEKDAYS, WEEKDAYS_ABBR
 
-from calendartools.periods.proxybase import LocalizedSimpleProxy
+from calendartools.periods.proxybase import SimpleProxy
 from calendartools import defaults
 from calendartools.utils import standardise_first_dow
 
@@ -40,7 +40,7 @@ def first_day_of_week(dt):
             relativedelta(weekday=first_dow, days=-6))
 
 
-class Period(LocalizedSimpleProxy):
+class Period(SimpleProxy):
     month_names = MONTHS.values()
     month_names_abbr = MONTHS_3.values()
     format = 'DATETIME_FORMAT'
@@ -59,9 +59,6 @@ class Period(LocalizedSimpleProxy):
     def process_occurrences(self, occurrences, key=None):
         if not key:
             key = lambda o: o.start
-        if self.timezone:
-            occurrences = [o.localize(timezone=self.timezone)
-                           if hasattr(o, 'localize') else o for o in occurrences]
         return [o for o in occurrences if key(o) in self]
 
     def convert(self, dt):

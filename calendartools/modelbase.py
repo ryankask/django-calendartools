@@ -11,7 +11,6 @@ from threaded_multihost.fields import CreatorField, EditorField
 from calendartools import defaults
 from calendartools.exceptions import MaxOccurrenceCreationsExceeded
 from calendartools.signals import collect_validators
-from calendartools.modelproxy import LocalizedOccurrenceProxy
 
 from model_utils import Choices
 from model_utils.fields import StatusField
@@ -223,9 +222,6 @@ class OccurrenceBase(PluggableValidationMixin, StatusBase):
         return (self.status == self.STATUS.cancelled or
                 self.calendar.status == self.calendar.STATUS.cancelled or
                 self.event.status == self.event.STATUS.cancelled)
-
-    def localize(self, timezone):
-        return LocalizedOccurrenceProxy(self, timezone=timezone)
 
 
 class AttendanceBase(PluggableValidationMixin, AuditedModel):
