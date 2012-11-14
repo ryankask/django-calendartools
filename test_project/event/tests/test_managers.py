@@ -1,6 +1,9 @@
-from datetime import datetime, timedelta
-from django.test import TestCase
+from datetime import timedelta
+
 from django.contrib.auth.models import User
+from django.test import TestCase
+from django.utils import timezone
+
 from nose.tools import *
 from event.models import Calendar, Event, Occurrence, Attendance
 
@@ -19,7 +22,7 @@ class TestCommonManager(TestCase):
                 status=status
             ))
 
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.finish = self.start + timedelta(hours=2)
 
         self.occurrences = []
@@ -204,7 +207,7 @@ class TestAttendanceManager(TestCase):
                 status=status
             ))
 
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.finish = self.start + timedelta(hours=2)
 
         self.occurrences = []

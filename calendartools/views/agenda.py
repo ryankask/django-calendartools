@@ -1,4 +1,4 @@
-from datetime import date
+from django.utils import timezone
 
 from calendartools import defaults
 from calendartools.views.calendars import (
@@ -32,7 +32,7 @@ class DayAgenda(DayView):
 
 
 def today_agenda(request, slug, *args, **kwargs):
-    today = date.today()
-    view = DayAgenda(request=request, slug=slug, year=str(today.year),
-                   month=str(today.strftime('%b').lower()), day=str(today.day), **kwargs)
-    return view.get(request, slug=slug, year=today.year, day=today.day)
+    now = timezone.now()
+    view = DayAgenda(request=request, slug=slug, year=str(now.year),
+                   month=str(now.strftime('%b').lower()), day=str(now.day), **kwargs)
+    return view.get(request, slug=slug, year=now.year, day=now.day)

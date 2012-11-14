@@ -1,6 +1,7 @@
-from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.db.models.loading import get_model
+from django.utils import timezone
+
 from calendartools import defaults, signals
 from calendartools.validators.base import BaseValidator
 
@@ -16,7 +17,7 @@ class BaseAttendanceValidator(BaseValidator):
 class CannotBookFinishedEventsValidator(BaseAttendanceValidator):
     def validate(self):
         if (not self.attendance.pk and
-            self.attendance.occurrence.finish < datetime.now()):
+            self.attendance.occurrence.finish < timezone.now()):
             raise ValidationError(
                 'Cannot book/attend events which have occurred in the past.'
             )
@@ -25,7 +26,7 @@ class CannotBookFinishedEventsValidator(BaseAttendanceValidator):
 class CannotAttendFutureEventsValidator(BaseAttendanceValidator):
     def validate(self):
         if (self.attendance.status == self.attendance.STATUS.attended and
-            self.attendance.occurrence.start > datetime.now()):
+            self.attendance.occurrence.start > timezone.now()):
             raise ValidationError(
                 'Cannot attend events which have not yet occurred.'
             )

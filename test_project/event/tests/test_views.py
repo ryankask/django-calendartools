@@ -1,10 +1,11 @@
-from datetime import datetime, timedelta, date
+from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
 from event.models import (
     Calendar, Event, Occurrence, Attendance
@@ -119,7 +120,7 @@ class TestEventDetailView(TestCase):
             content_type__app_label=defaults.CALENDAR_APP_LABEL,
             codename='add_occurrence'
         )
-        self.start = datetime.utcnow() + timedelta(hours=2)
+        self.start = timezone.now() + timedelta(hours=2)
         self.occurrence = Occurrence.objects.create(
             calendar=self.calendar,
             event=self.event,
@@ -272,7 +273,7 @@ class TestEventDetailView2(TestCase):
             description="This is the description.",
             creator=self.user
         )
-        self.start = datetime.utcnow() + timedelta(hours=2)
+        self.start = timezone.now() + timedelta(hours=2)
 
     def test_list_occurrences(self):
         for status, label in Occurrence.STATUS:
@@ -305,7 +306,7 @@ class TestOccurrenceDetailView(TestCase):
             description="This is the description.",
             creator=self.user
         )
-        start = datetime.now() + timedelta(1)
+        start = timezone.now() + timedelta(1)
         self.occurrence = Occurrence.objects.create(
             calendar=self.calendar,
             event=self.event,
@@ -548,7 +549,7 @@ class TestConfirmOccurrenceView(TestCase):
         self.event2 = Event.objects.create(
             name='Event', slug='other-event', creator=self.user
         )
-        now     = datetime.now() - timedelta.resolution
+        now     = timezone.now() - timedelta.resolution
         start   = now + timedelta(minutes=30)
         finish  = start + timedelta(hours=1)
 
@@ -687,7 +688,7 @@ class TestCalendarVisibility(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.user
         )
-        now = datetime.now() + timedelta(days=1)
+        now = timezone.now() + timedelta(days=1)
         self.occurrence = Occurrence.objects.create(
             calendar=self.calendar,
             event=self.event,
@@ -834,8 +835,8 @@ class TestCalendarViews(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.user
         )
-        now = datetime.now()
-        self.base_datetime = datetime(now.year + 1, 1, 7)
+        now = timezone.now()
+        self.base_datetime = (now + relativedelta(years=1)).replace(month=1, day=7)
         self.datetimes = [
             self.base_datetime,
             self.base_datetime + relativedelta(days=1),

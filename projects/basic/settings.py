@@ -15,10 +15,13 @@ LANGUAGE_CODE = 'en_gb'
 SITE_ID = 1
 SECRET_KEY = '5^m%rm8(t4&cew1v-hkaq1)$4r603yu6d-#sv0k=!1)_@n473i'
 
+USE_TZ = True
 USE_L10N = True
 USE_I18N = True
 # FIRST_DAY_OF_WEEK = 1 # Monday
 FORMAT_MODULE_PATH = 'calendartools.formats'
+from datetime import timedelta
+TIMESLOT_INTERVAL = timedelta(hours=1)
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',

@@ -1,6 +1,12 @@
 # Minimal settings used for testing.
 from os import path
 
+import warnings
+warnings.filterwarnings(
+    'error', r'DateTimeField received a naive datetime',
+    RuntimeWarning, r'django\.db\.models\.fields'
+)
+
 CURRENT_DIR = path.abspath(path.dirname(__file__))
 CALENDARTOOLS_DIR = path.abspath(path.dirname(path.dirname(__file__)))
 
@@ -30,6 +36,9 @@ STATICFILES_FINDERS = (
 )
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
+
+USE_TZ = True
+TIME_ZONE = 'Europe/Paris'
 
 USE_I18N = True
 USE_L10N = True

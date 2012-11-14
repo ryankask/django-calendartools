@@ -6,26 +6,27 @@ from dateutil.rrule import rrule, MONTHLY, WEEKLY, HOURLY, DAILY
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.dates import MONTHS, MONTHS_3, WEEKDAYS, WEEKDAYS_ABBR
-from django.utils import translation
+from django.utils import translation, timezone
 
 from django.test import TestCase
 from nose.tools import *
 
 from calendartools import defaults
-from event.models import Calendar, Event, Occurrence
 from calendartools.periods import (
     SimpleProxy, Period, Year, Month, Week, Day, Hour, TripleMonth,
     first_day_of_week
 )
+from calendartools.utils import make_datetime
 from calendartools.validators.defaults.occurrence import (
     activate_default_occurrence_validators,
     deactivate_default_occurrence_validators
 )
+from event.models import Calendar, Event, Occurrence
 
 
 class TestSimpleProxy(TestCase):
     def setUp(self):
-        self.datetime = datetime.now()
+        self.datetime = timezone.now()
         self.proxy = SimpleProxy(self.datetime)
 
     def test_getattr(self):
@@ -67,10 +68,10 @@ class TestDateTimeProxies(TestCase):
 
     def test_default_datetimeproxy_conversion(self):
         mapping = (
-            (date(1982, 8, 17), datetime(1982, 8, 17)),
-            (datetime(1982, 8, 17, 6), datetime(1982, 8, 17, 6, 0, 0)),
-            (datetime(1982, 8, 17, 6, 30), datetime(1982, 8, 17, 6, 30, 0)),
-            (datetime(1982, 8, 17, 6, 30, 5), datetime(1982, 8, 17, 6, 30, 5)),
+            (date(1982, 8, 17), make_datetime(1982, 8, 17)),
+            (datetime(1982, 8, 17, 6), make_datetime(1982, 8, 17, 6, 0, 0)),
+            (datetime(1982, 8, 17, 6, 30), make_datetime(1982, 8, 17, 6, 30, 0)),
+            (datetime(1982, 8, 17, 6, 30, 5), make_datetime(1982, 8, 17, 6, 30, 5)),
         )
         for inp, expected in mapping:
             assert_equal(Period(inp).start, expected)
@@ -208,14 +209,14 @@ class TestDateTimeProxies(TestCase):
 
         ten_min_period = TenMinuteInterval(datetime(1982, 8, 17, 6, 30, 5))
         good_inputs = (
-            datetime(1982, 8, 17, 6, 30),
-            datetime(1982, 8, 17, 6, 35),
-            datetime(1982, 8, 17, 6, 40) - timedelta.resolution,
+            make_datetime(1982, 8, 17, 6, 30),
+            make_datetime(1982, 8, 17, 6, 35),
+            make_datetime(1982, 8, 17, 6, 40) - timedelta.resolution,
         )
         bad_inputs = (
             date(1982, 8, 17),
-            datetime(1982, 8, 17, 6, 30) - timedelta.resolution,
-            datetime(1982, 8, 17, 6, 40),
+            make_datetime(1982, 8, 17, 6, 30) - timedelta.resolution,
+            make_datetime(1982, 8, 17, 6, 40),
         )
         for inp in good_inputs:
             assert_in(inp, ten_min_period)
@@ -324,19 +325,19 @@ class TestDateTimeProxies(TestCase):
         assert_equal('aug', self.month.abbr)
 
     def test_start_property(self):
-        assert_equal(self.hour.start,  datetime(1982, 8, 17, 6))
-        assert_equal(self.day.start,   datetime(1982, 8, 17))
-        assert_equal(self.week.start,  datetime(1982, 8, 16))
-        assert_equal(self.month.start, datetime(1982, 8, 1))
-        assert_equal(self.year.start,  datetime(1982, 1, 1))
+        assert_equal(self.hour.start,  make_datetime(1982, 8, 17, 6))
+        assert_equal(self.day.start,   make_datetime(1982, 8, 17))
+        assert_equal(self.week.start,  make_datetime(1982, 8, 16))
+        assert_equal(self.month.start, make_datetime(1982, 8, 1))
+        assert_equal(self.year.start,  make_datetime(1982, 1, 1))
 
     def test_finish_property(self):
         smidge = timedelta.resolution
-        assert_equal(self.hour.finish,  datetime(1982, 8, 17, 7) - smidge)
-        assert_equal(self.day.finish,   datetime(1982, 8, 18) - smidge)
-        assert_equal(self.week.finish,  datetime(1982, 8, 23) - smidge)
-        assert_equal(self.month.finish, datetime(1982, 9, 1) - smidge)
-        assert_equal(self.year.finish,  datetime(1983, 1, 1) - smidge)
+        assert_equal(self.hour.finish,  make_datetime(1982, 8, 17, 7) - smidge)
+        assert_equal(self.day.finish,   make_datetime(1982, 8, 18) - smidge)
+        assert_equal(self.week.finish,  make_datetime(1982, 8, 23) - smidge)
+        assert_equal(self.month.finish, make_datetime(1982, 9, 1) - smidge)
+        assert_equal(self.year.finish,  make_datetime(1983, 1, 1) - smidge)
 
     def test_number_property(self):
         assert_equal(self.hour.number,  6)
@@ -400,13 +401,13 @@ class TestDateTimeProxies(TestCase):
 
 class TestLocalization(TestCase):
     def setUp(self):
-        self.datetime = datetime(1982, 8, 17)
+        self.datetime = make_datetime(1982, 8, 17)
         self.period   = Period(self.datetime)
         self.year     = Year(self.datetime)
         self.month    = Month(self.datetime)
         self.week     = Week(self.datetime)
         self.day      = Day(self.datetime)
-        self.hour     = Hour(datetime.combine(self.datetime.date(), time(6, 30, 5)))
+        self.hour     = Hour(self.datetime.replace(hour=6, minute=30, second=5))
         self.original_language = settings.LANGUAGE_CODE
 
     def tearDown(self):
@@ -482,7 +483,7 @@ class TestLocalization(TestCase):
 class TestDateAwareProperties(TestCase):
     def setUp(self):
         translation.activate('en-gb')
-        self.now = datetime.now()
+        self.now = timezone.now()
         self.periods = [Period, Year, Month, Week, Day, Hour]
         self.objects = [obj(self.now) for obj in self.periods]
 
@@ -531,7 +532,7 @@ class TestDateAwareProperties(TestCase):
 class TestFirstDayOfWeek(TestCase):
     def setUp(self):
         translation.activate('en-gb')
-        self.now = datetime.now()
+        self.now = timezone.now()
         self.periods = [Period, Year, Month, Week, Day, Hour]
         self.objects = [obj(self.now) for obj in self.periods]
 
@@ -564,28 +565,30 @@ class TestFirstDayOfWeek(TestCase):
 
     def test_week_properties(self):
         self.week = Week(datetime(1982, 8, 17))
-        assert_equal(self.week.start, datetime(1982, 8, 16))
-        assert_equal(self.week.finish, datetime(1982, 8, 23) - timedelta.resolution)
+        assert_equal(self.week.start, make_datetime(1982, 8, 16))
+        assert_equal(self.week.finish, make_datetime(1982, 8, 23) -
+                     timedelta.resolution)
 
     def test_week_properties_usa(self):
         translation.activate('en-us')
         self.week = Week(datetime(1982, 8, 17))
-        assert_equal(self.week.start, datetime(1982, 8, 15))
-        assert_equal(self.week.finish, datetime(1982, 8, 22) - timedelta.resolution)
+        assert_equal(self.week.start, make_datetime(1982, 8, 15))
+        assert_equal(self.week.finish, make_datetime(1982, 8, 22) -
+                     timedelta.resolution)
 
 
 class TestTripleMonth(TestCase):
     def setUp(self):
         self.datetime = datetime(1982, 8, 17)
         self.trimonth = TripleMonth(self.datetime)
-        self.expected = [
-            datetime(1982, 8, 1), datetime(1982, 9, 1), datetime(1982, 10, 1)
-        ]
+        self.expected = [make_datetime(1982, 8, 1), make_datetime(1982, 9, 1),
+                         make_datetime(1982, 10, 1)]
 
     def test_start_and_finish(self):
         assert_equal(self.trimonth.start, self.expected[0])
-        assert_equal(self.trimonth.finish, datetime(1982, 11, 1)
-                     - timedelta.resolution)
+        expected = make_datetime(1982, 11, 1) - timedelta.resolution
+        assert_equal(self.trimonth.finish.replace(tzinfo=None),
+                     expected.replace(tzinfo=None))
 
     def test_iterates_over_months(self):
         actual = [i for i in self.trimonth]
@@ -604,11 +607,11 @@ class TestTripleMonth(TestCase):
 class TestWeek(TestCase):
     def setUp(self):
         translation.activate('en-gb')
-        self.datetime = datetime(1982, 8, 17)   # Tuesday
+        self.datetime = make_datetime(1982, 8, 17)   # Tuesday
         self.week = Week(self.datetime)
         self.expected = [
-            datetime(1982, 8, 16),              # Monday
-            datetime(1982, 8, 22)
+            make_datetime(1982, 8, 16),              # Monday
+            make_datetime(1982, 8, 22)
         ]
 
     def tearDown(self):
@@ -654,7 +657,7 @@ class TestDateTimeProxiesWithOccurrences(TestCase):
             description="This is the description.",
             creator=self.user
         )
-        self.start = datetime.now() + timedelta(1)
+        self.start = timezone.now() + timedelta(1)
         Occurrence.objects.create(
             calendar=self.calendar,
             event=self.event,
@@ -705,7 +708,7 @@ class TestDateTimeProxiesWithLocalizedOccurrences(TestCase):
             description="This is the description.",
             creator=self.user
         )
-        self.start = datetime(1982, 8, 16)
+        self.start = make_datetime(1982, 8, 16)
         self.end_of_week = self.start + timedelta(7) - timedelta.resolution
 
         mapping = [

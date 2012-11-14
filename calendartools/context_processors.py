@@ -1,10 +1,13 @@
-from datetime import datetime, date
+from datetime import date
+
 from django.contrib.sites.models import Site
+from django.utils import timezone
+
 from calendartools.periods import Day
 
 def current_datetime(request):
     data = {
-        'now':   datetime.now(),
+        'now':   timezone.now(),
         'today': Day(date.today()),
     }
     return data

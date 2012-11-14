@@ -1,7 +1,7 @@
 from itertools import izip_longest
 from django import template
 from django.template.defaultfilters import stringfilter
-from django.utils import translation
+from django.utils import translation, timezone
 from threaded_multihost.threadlocals import get_current_request
 
 register = template.Library()
@@ -237,8 +237,7 @@ def persist_query_string(url, from_url=None):
 @register.filter()
 def time_relative_to_today(dt):
     from calendartools.periods import Day
-    from datetime import datetime
-    today = Day(datetime.now())
+    today = Day(timezone.now())
     if dt < today:
         return 'past'
     elif dt in today:

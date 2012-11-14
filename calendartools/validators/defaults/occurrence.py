@@ -1,6 +1,7 @@
-from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.db.models.loading import get_model
+from django.utils import timezone
+
 from calendartools import defaults, signals
 from calendartools.validators.base import BaseValidator
 
@@ -23,7 +24,7 @@ class FinishGTStartValidator(BaseOccurrenceValidator):
 
 class FutureOccurrencesOnlyValidator(BaseOccurrenceValidator):
     def validate(self):
-        if not self.occurrence.pk and self.occurrence.start < datetime.now():
+        if not self.occurrence.pk and self.occurrence.start < timezone.now():
             raise ValidationError(
                 'Event occurrences cannot be created in the past.'
             )

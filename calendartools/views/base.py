@@ -1,10 +1,9 @@
-from datetime import datetime
-
 from django.conf import settings
 from django.db.models import Max, Min
 from django.db.models.loading import get_model
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.views.generic.base import TemplateResponseMixin
 from django.views.generic.list import BaseListView
 from django.views.generic.dates import DateMixin, _date_from_string
@@ -103,7 +102,7 @@ class CalendarViewBase(DateMixin, BaseListView, TemplateResponseMixin):
         return queryset
 
     def apply_period_filter(self, queryset, period):
-        now = datetime.now()
+        now = timezone.now()
         if period == 'past':
             queryset = queryset.filter(start__lt=now)
         elif period == 'future':
@@ -120,7 +119,7 @@ class CalendarViewBase(DateMixin, BaseListView, TemplateResponseMixin):
         allow_future = self.get_allow_future()
         date_field = self.get_date_field()
         if not allow_future:
-            queryset = queryset.filter(**{'%s__lte' % date_field: datetime.now()})
+            queryset = queryset.filter(**{'%s__lte' % date_field: timezone.now()})
         return queryset
 
     def allow_empty_check(self, queryset):
@@ -131,12 +130,12 @@ class CalendarViewBase(DateMixin, BaseListView, TemplateResponseMixin):
             )
         return queryset
 
-    def get_dated_queryset(self, order='asc', **lookup):
+    def get_dated_queryset(self, ordering='asc', **lookup):
         qs = self.get_queryset().filter(**lookup)
         date_field = self.get_date_field()
         period = self.period(self.date)
         filter_kwargs = {'%s__range' % date_field: (period.start, period.finish)}
-        order = '' if order == 'asc' else '-'
+        order = '' if ordering == 'asc' else '-'
         return qs.filter(**filter_kwargs).order_by("%s%s" % (order, date_field))
 
     def get_context_data(self, **kwargs):

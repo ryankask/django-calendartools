@@ -3,7 +3,7 @@ Convenience forms for adding and updating ``Event`` and ``Occurrence``s.
 
 '''
 import logging
-from datetime import datetime, date, time, timedelta
+from datetime import date, timedelta
 from dateutil import rrule
 from pprint import pformat
 
@@ -17,11 +17,12 @@ from calendartools.constants import (
     MONTH_SHORT, ORDINAL,
     FREQUENCY_CHOICES, REPEAT_CHOICES, ISO_WEEKDAYS_MAP
 )
-from calendartools.fields import MultipleIntegerField
 from calendartools.defaults import (
     MINUTES_INTERVAL, SECONDS_INTERVAL, default_timeslot_offset_options,
     MAX_OCCURRENCE_CREATION_COUNT, CALENDAR_APP_LABEL
 )
+from calendartools.fields import MultipleIntegerField
+from calendartools.utils import make_datetime
 from timezones.forms import TimeZoneField
 
 log = logging.getLogger('calendartools.forms')
@@ -239,7 +240,9 @@ class MultipleOccurrenceForm(OccurrenceBaseForm):
             self.initial.setdefault('year_month_ordinal', ordinal)
             self.initial.setdefault('year_month_ordinal_day', u'%d' % weekday)
 
-            offset = (dtstart - datetime.combine(dtstart.date(), time(0))).seconds
+            beginning = make_datetime(dtstart.year, dtstart.month, dtstart.day,
+                                      tzinfo=dtstart.tzinfo)
+            offset = (dtstart - beginning).seconds
             self.initial.setdefault('start_time_delta', u'%d' % offset)
             self.initial.setdefault('end_time_delta', u'%d' % (
                 offset + SECONDS_INTERVAL,)
@@ -311,17 +314,27 @@ class MultipleOccurrenceForm(OccurrenceBaseForm):
             not self.cleaned_data.get('year_months')):
             self.add_field_error('year_months', required_errmsg)
 
+    def clean_until(self):
+        until = self.cleaned_data['until']
+
+        if until is not None:
+            until = make_datetime(until.year, until.month, until.day)
+
+        return until
+
     def check_until_later_than_finish_datetime(self):
         repeats = self.cleaned_data.get('repeats')
         until = self.cleaned_data.get('until')
         if (until and repeats and repeats == 'until'
-            and until <= self.cleaned_data['end_time'].date()):
+            and until <= self.cleaned_data['end_time']):
             raise forms.ValidationError(_("'Until' date must occur in the future."))
 
     def clean(self):
         self.check_for_required_fields()
 
-        day = datetime.combine(self.cleaned_data['day'], time(0))
+        naive_day =self.cleaned_data['day']
+        day = make_datetime(naive_day.year, naive_day.month, naive_day.day)
+
         self.cleaned_data['start_time'] = day + timedelta(
             seconds=self.cleaned_data['start_time_delta']
         )

@@ -1,10 +1,9 @@
-from datetime import datetime
-
 from django import http
 from django.core.urlresolvers import reverse
 from django.db.models.loading import get_model
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.utils import timezone
 from django.views.generic import ListView
 
 from calendartools import forms, defaults, decorators
@@ -73,7 +72,7 @@ def event_detail(request, slug, template='calendar/event_detail.html',
         recurrence_form = recurrence_form_class(
             event=event,
             request=request,
-            initial={'dtstart': datetime.now()}
+            initial={'dtstart': timezone.now()}
         )
 
     if can_edit_events:

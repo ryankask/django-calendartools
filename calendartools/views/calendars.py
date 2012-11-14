@@ -7,7 +7,7 @@ from django.db.models.loading import get_model
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
-from django.utils import formats
+from django.utils import formats, timezone
 from django.views.generic import ListView
 from django.views.generic.dates import YearMixin, MonthMixin, WeekMixin, DayMixin
 
@@ -88,8 +88,9 @@ class DayView(CalendarViewBase, YearMixin, MonthMixin, DayMixin):
     period = Day
     template_name = "calendar/calendar/day.html"
 
+
 def today_view(request, slug, *args, **kwargs):
-    today = date.today()
-    view = DayView(request=request, slug=slug, year=str(today.year),
-                   month=str(today.strftime('%b').lower()), day=str(today.day), **kwargs)
-    return view.get(request, slug=slug, year=today.year, day=today.day)
+    now = timezone.now()
+    view = DayView(request=request, slug=slug, year=str(now.year),
+                   month=str(now.strftime('%b').lower()), day=str(now.day), **kwargs)
+    return view.get(request, slug=slug, year=now.year, day=now.day)

@@ -1,12 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from event.models import Calendar, Event, Occurrence
-
 from django.test import TestCase
+from django.utils import timezone
+
 from calendartools.forms import MultipleOccurrenceForm
+from event.models import Calendar, Event, Occurrence
 from nose.tools import *
 
 
@@ -21,12 +22,12 @@ class TestMultipleSitesFunctionality(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.creator
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        now = timezone.now()
+        self.start = now + timedelta(minutes=30)
         self.finish = self.start + timedelta(hours=2)
         self.occurrence = self.event.add_occurrences(
             self.calendar, self.start, self.finish)[0]
 
-        now = datetime.now()
         self.base_datetime = datetime(now.year + 1, 1, 7)
         self.urls = [
             ('year-calendar', {

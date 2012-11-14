@@ -12,7 +12,7 @@ from django.utils.dates import MONTHS, MONTHS_3, WEEKDAYS, WEEKDAYS_ABBR
 
 from calendartools.periods.proxybase import SimpleProxy
 from calendartools import defaults
-from calendartools.utils import standardise_first_dow
+from calendartools.utils import make_datetime, standardise_first_dow
 
 __all__ = ['Period', 'Hour', 'Day', 'Week', 'Month', 'TripleMonth', 'Year',
            'first_day_of_week']
@@ -36,8 +36,9 @@ def get_weekday_properties():
 
 def first_day_of_week(dt):
     first_dow = standardise_first_dow(formats.get_format('FIRST_DAY_OF_WEEK'))
-    return (datetime(dt.year, dt.month, dt.day) +
-            relativedelta(weekday=first_dow, days=-6))
+    tzinfo = dt.tzinfo if hasattr(dt, 'tzinfo') else None
+    first_date = make_datetime(dt.year, dt.month, dt.day, tzinfo=tzinfo)
+    return first_date + relativedelta(weekday=first_dow, days=-6)
 
 
 class Period(SimpleProxy):
@@ -62,35 +63,34 @@ class Period(SimpleProxy):
         return [o for o in occurrences if key(o) in self]
 
     def convert(self, dt):
-        """Returns naive datetime representation of date/datetime, with no
-        microseconds."""
-        for attr in ('hour', 'minute', 'second'):
-            if not hasattr(dt, attr):
-                return datetime(dt.year, dt.month, dt.day)
-        return datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+        """ Returns datetime representation of date/datetime in either the local
+        dt or the dt's tzinfo, with no microseconds. """
+        if isinstance(dt, datetime):
+            return make_datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute,
+                                 dt.second, tzinfo=dt.tzinfo)
+        else:
+            return make_datetime(dt.year, dt.month, dt.day)
 
     def interval(self):
         raise NotImplementedError
-
-    def _coerce_to_datetime(self, dt):
-        try:
-            return self.convert(dt)
-        except (AttributeError, ValueError, TypeError):
-            return
 
     def __contains__(self, item):
         """Note that when comparing datetime.date objects with this class, they
         will automatically be coerced to datetime objects with a default start
         time of 12:00:00 am, which might mean they are included as members."""
-        item = self._coerce_to_datetime(item)
-        if not item:
+        try:
+            item = self.convert(item)
+        except AttributeError:
             return False
+
         return self.start <= item <= self.finish
 
     def __cmp__(self, other):
-        other = self._coerce_to_datetime(other)
-        if not other:
+        try:
+            other = self.convert(other)
+        except AttributeError:
             return -1
+
         return cmp(self.start, other)
 
     def previous(self):
@@ -110,7 +110,8 @@ class Period(SimpleProxy):
 
 class Hour(Period):
     interval = relativedelta(hours=+1)
-    convert = lambda self, dt: datetime(dt.year, dt.month, dt.day, dt.hour)
+    convert = lambda self, dt: make_datetime(dt.year, dt.month, dt.day, dt.hour,
+                                             tzinfo=dt.tzinfo)
     period_name = _('hour')
     period_adverb = _('hourly')
     format = 'TIME_FORMAT'
@@ -139,13 +140,16 @@ class Hour(Period):
 
 class Day(Period):
     interval = relativedelta(days=+1)
-    convert = lambda self, dt: datetime(dt.year, dt.month, dt.day)
     period_name = _('day')
     period_adverb = _('daily')
     format = 'DATE_FORMAT'
 
     def __iter__(self):
         return iter(self.hours)
+
+    def convert(self, dt):
+        tzinfo = dt.tzinfo if hasattr(dt, 'tzinfo') else None
+        return make_datetime(dt.year, dt.month, dt.day, tzinfo=tzinfo)
 
     @property
     def name(self):
@@ -192,7 +196,9 @@ class Day(Period):
                 return Year(self, occurrences=self.occurrences)
 
         intervals = []
-        start = datetime.combine(self.start.date(), defaults.TIMESLOT_START_TIME)
+        start_time = defaults.TIMESLOT_START_TIME
+        start = self.start.replace(hour=start_time.hour,
+                                   minute=start_time.minute)
         finish = start + defaults.TIMESLOT_END_TIME_DURATION
         while start <= finish:
             intervals.append(DayInterval(start, occurrences=self.occurrences))
@@ -210,9 +216,21 @@ class Week(Period):
     def __iter__(self):
         return iter(self.days)
 
+    def __contains__(self, item):
+        """ Check if ``item`` is in this week's range but instead of coercing
+        ``item`` using ``Week.convert``, use ``Period.convert``. This is to
+        avoid "incorrect" starts of the week because of timezone
+        differences. """
+        try:
+            item = super(Week, self).convert(item)
+        except AttributeError:
+            return False
+
+        return self.start <= item <= self.finish
+
     @property
     def number(self):
-        return ((self - datetime(self.year, 1, 1)).days / 7) + 1
+        return ((self - make_datetime(self.year, 1, 1)).days / 7) + 1
 
     @property
     def days(self):
@@ -241,13 +259,16 @@ class Week(Period):
 
 class Month(Period):
     interval = relativedelta(months=+1)
-    convert = lambda self, dt: datetime(dt.year, dt.month, 1)
     period_name = _('month')
     period_adverb = _('monthly')
     format = 'DATE_FORMAT'
 
     def __iter__(self):
         return iter(self.weeks)
+
+    def convert(self, dt):
+        tzinfo = dt.tzinfo if hasattr(dt, 'tzinfo') else None
+        return make_datetime(dt.year, dt.month, 1, tzinfo=tzinfo)
 
     @property
     def name(self):
@@ -288,7 +309,7 @@ class Month(Period):
     @property
     def calendar_display(self):
         cal = calendar.monthcalendar(self.year, self.month)
-        return ((Day(datetime(self.year, self.month, num),
+        return ((Day(make_datetime(self.year, self.month, num),
                      occurrences=self.occurrences) if num else 0
                      for num in lst) for lst in cal)
 
@@ -327,13 +348,16 @@ class TripleMonth(Month):
 
 class Year(Period):
     interval = relativedelta(years=+1)
-    convert = lambda self, dt: datetime(dt.year, 1, 1)
     period_name = _('year')
     period_adverb = _('yearly')
     format = 'DATE_FORMAT'
 
     def __iter__(self):
         return iter(self.months)
+
+    def convert(self, dt):
+        tzinfo = dt.tzinfo if hasattr(dt, 'tzinfo') else None
+        return make_datetime(dt.year, 1, 1, tzinfo=tzinfo)
 
     @property
     def number(self):

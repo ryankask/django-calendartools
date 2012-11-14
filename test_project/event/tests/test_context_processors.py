@@ -1,9 +1,12 @@
+from datetime import datetime, date
+
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+
 from nose.tools import *
-from datetime import datetime, date
 from calendartools.periods import Day
+
 
 class TestContextProcessors(TestCase):
     def test_current_datetime(self):

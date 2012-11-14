@@ -1,7 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
+
 from event.models import (
     Calendar, Event, Occurrence, Attendance, Cancellation
 )
@@ -22,7 +24,7 @@ class TestStatusBase(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.creator
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.finish = self.start + timedelta(hours=2)
         self.occurrence = self.event.add_occurrences(
             self.calendar, self.start, self.finish)[0]
@@ -45,7 +47,7 @@ class TestEvent(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.creator
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.finish = self.start + timedelta(hours=2)
 
     def test_add_occurrences_basic(self):
@@ -130,7 +132,7 @@ class TestOccurrence(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.creator
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.occurrence = Occurrence.objects.create(
             calendar=self.calendar,
             event=self.event,
@@ -148,7 +150,7 @@ class TestOccurrence(TestCase):
             )
 
     def test_created_occurrences_must_occur_in_future(self):
-        start = datetime.now()
+        start = timezone.now()
         finish = start + timedelta(hours=2)
         assert_raises(
             ValidationError,
@@ -163,7 +165,7 @@ class TestOccurrence(TestCase):
         assert_raises(ValidationError, occurrence.save)
 
     def test_updated_occurrences_need_not_occur_in_future(self):
-        self.occurrence.start = datetime.now() - timedelta.resolution
+        self.occurrence.start = timezone.now() - timedelta.resolution
         self.occurrence.finish = self.occurrence.start + timedelta(hours=2)
         try:
             self.occurrence.save()
@@ -230,7 +232,7 @@ class TestOccurrenceDuration(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.creator
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         defaults.MAX_OCCURRENCE_DURATION = timedelta(hours=2)
         defaults.MIN_OCCURRENCE_DURATION = timedelta(minutes=15)
 
@@ -280,7 +282,7 @@ class TestAttendance(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.user
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.finish = self.start + timedelta(minutes=30)
         self.occurrence = self.event.add_occurrences(
             self.calendar, self.start, self.finish)[0]
@@ -340,7 +342,7 @@ class TestAttendanceCancellation(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.user
         )
-        self.start = datetime.now() + timedelta(minutes=30)
+        self.start = timezone.now() + timedelta(minutes=30)
         self.finish = self.start + timedelta(minutes=30)
         self.occurrence = self.event.add_occurrences(
             self.calendar, self.start, self.finish)[0]

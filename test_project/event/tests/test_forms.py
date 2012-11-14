@@ -1,4 +1,4 @@
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil import rrule
 
@@ -6,6 +6,7 @@ from django import forms
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.utils import timezone
 
 from nose.tools import *
 
@@ -27,7 +28,7 @@ class TestAttendanceForm(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.user
         )
-        self.start = datetime.now() + timedelta(1)
+        self.start = timezone.now() + timedelta(1)
         self.occurrence = Occurrence.objects.create(
             calendar=self.calendar,
             event=self.event,
@@ -86,8 +87,8 @@ class TestMultipleOccurrenceFormValidation(TestCase):
         self.event = Event.objects.create(
             name='Event', slug='event', creator=self.creator
         )
-        self.today = date.today()
-        self.tomorrow = self.today + timedelta(1)
+        self.now = timezone.now()
+        self.tomorrow = self.now + timedelta(1)
 
         self.full_data = {
             'calendar':               self.calendar.pk,
@@ -347,7 +348,7 @@ class TestMultipleOccurrenceFormValidation(TestCase):
             [[i] for i in range(1,13)] +
             [[1,2], [11,12], [1,2,3,4,5,6], [7,8,9,10,11,12]]
         )
-        next_month = self.today + relativedelta(months=1)
+        next_month = self.now + relativedelta(months=1)
         first_day_of_next_month = next_month.replace(day=1)
         # Necessary because of potential slow-down: see test below.
         self.data.update({

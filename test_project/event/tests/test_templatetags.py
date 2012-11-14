@@ -1,10 +1,11 @@
 # -*- coding: UTF-8 -*-
+from datetime import timedelta
 
-from datetime import datetime, timedelta
 from django.template import Template, Context
 from django.test import TestCase
-from django.utils import translation
+from django.utils import translation, timezone
 from django.utils.translation import ugettext_lazy as _
+
 from nose.tools import *
 from calendartools.templatetags.calendartools_tags import (
     get_query_string,
@@ -163,7 +164,7 @@ class TestQueryStringManipulation(TestCase):
 
 class TestTimeRelativeToToday(TestCase):
     def setUp(self):
-        now = datetime.now()
+        now = timezone.now()
         first_thing = now.replace(hour=0, minute=0, second=0, microsecond=0)
         last_thing = (first_thing + timedelta(1)) - timedelta.resolution
 

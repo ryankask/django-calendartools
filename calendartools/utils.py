@@ -1,4 +1,23 @@
+from datetime import datetime
+
 from django.conf import settings
+from django.utils import timezone
+
+def make_datetime(*datetime_values, **kwargs):
+    """ Create an aware datetime. If a ``tzinfo`` keyword argument is supplied,
+    create an aware datetime using that time zone. Otherwise, the time zone of
+    the new datetime is Django's current timezone.
+
+    See https://docs.djangoproject.com/en/dev/topics/i18n/timezones/#default-current-time-zone
+    for the definition of "current time zone."
+    """
+    naive_dt = datetime(*datetime_values)
+
+    tzinfo = kwargs.get('tzinfo')
+    if tzinfo is None:
+        tzinfo = timezone.get_current_timezone()
+
+    return timezone.make_aware(naive_dt, tzinfo)
 
 def timedelta_to_total_seconds(timedelta):
     '''
