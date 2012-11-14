@@ -648,7 +648,7 @@ class TestConfirmOccurrenceView(TestCase):
                 priority = 9000
                 error_message = "Event 'other-event' isn't allowed!"
                 def validate(self):
-                    if self.instance.event.slug == 'other-event':
+                    if self.instance.event.slug == 'event-2':
                         raise ValidationError(self.error_message)
 
             self.validator = Event2EventsNotAllowed
