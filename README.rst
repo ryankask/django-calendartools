@@ -1,6 +1,5 @@
 A project intended to synthesise the best parts of existing Django
 scheduling/calendaring applications.
 
-It will be distributed via pip/easy_install when the author is satisfied the
-core design is sufficiently stable, so as not to cause headaches in the
-long-run.
+This fork only works with Django 1.5 and above. It supports custom user models
+and has experimental native Django time zone support.

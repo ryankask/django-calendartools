@@ -1,7 +1,7 @@
-#Django>=1.5
-git+git://github.com/chrischambers/django-threaded-multihost.git#egg=django-threaded-multihost
-django-extensions==0.9
+Django>=1.5
+git+http://github.com/languagelab/django-threaded-multihost#egg=django-threaded-multihost
+django-extensions==1.0.1
 python-dateutil==2.1
 django-timezones==0.2
-pytz==2012d
+pytz>=2012h
 django-model-utils==1.1.0
