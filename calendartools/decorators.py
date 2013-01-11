@@ -13,7 +13,8 @@ def get_occurrence_data_from_session(view):
         event               = occurrence_info['event']
         valid_occurrences   = occurrence_info['valid_occurrences']
         invalid_occurrences = occurrence_info['invalid_occurrences']
+        next_url            = occurrence_info.get('next_url', '')
 
         return view(request, event, valid_occurrences, invalid_occurrences,
-                    *args, **kwargs)
+                    next_url, *args, **kwargs)
     return new_view
