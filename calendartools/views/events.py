@@ -136,11 +136,12 @@ def occurrence_detail(request, slug, pk, show_attending=True, *args, **kwargs):
 
 @decorators.get_occurrence_data_from_session
 def confirm_occurrences(request, event, valid_occurrences, invalid_occurrences,
-                        next_url, FormClass=forms.ConfirmOccurrenceForm,
+                        FormClass=forms.ConfirmOccurrenceForm,
                         check_add_occurrences=defaults.add_occurrence_permission_check,
-                        event_detail_url_name='event-detail', *args, **kwargs):
+                        next=None, event_detail_url_name='event-detail',
+                        *args, **kwargs):
 
-    next = next_url or reverse(event_detail_url_name, args=[event.slug])
+    next = next or reverse(event_detail_url_name, args=[event.slug])
 
     if not check_add_occurrences(request):
         return http.HttpResponseRedirect(next)
