@@ -29,12 +29,11 @@ setup(
     install_requires=[
         'Django>=1.5',
         'django-threaded-multihost==2.0',
-        'django-extensions==1.0.1',
-        'django-extensions==1.0.1',
+        'django-extensions==1.1.1',
         'python-dateutil==2.1',
         'django-timezones==0.2',
-        'pytz>=2012h',
-        'django-model-utils==1.1.0',
+        'pytz>=2013b',
+        'django-model-utils>=1.2.0',
     ],
     dependency_links=[
         'https://github.com/languagelab/django-threaded-multihost/tarball/master#egg=django-threaded-multihost-2.0'
