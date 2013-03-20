@@ -26,9 +26,10 @@ def event_detail(request, slug, template='calendar/event_detail.html',
                  check_edit_events=defaults.change_event_permission_check,
                  check_add_occurrences=defaults.add_occurrence_permission_check,
                  list_occurrences=True, success_url=None, extra_context=None,
+                 confirm_occurrences_url_name='confirm-occurrences',
                  *args, **kwargs):
 
-    success_url = success_url or request.path
+    success_url = success_url or request.get_full_path()
     extra_context = extra_context or {}
     event = get_object_or_404(Event.objects.visible(request.user), slug=slug)
     event_form = recurrence_form = None
@@ -60,7 +61,8 @@ def event_detail(request, slug, template='calendar/event_detail.html',
                         'invalid_occurrences': recurrence_form.invalid_occurrences,
                     }
                     request.session['occurrence_info'] = session_data
-                    return http.HttpResponseRedirect(reverse('confirm-occurrences'))
+                    return http.HttpResponseRedirect(reverse(
+                        confirm_occurrences_url_name))
                 recurrence_form.save()
                 return http.HttpResponseRedirect(success_url)
         else:
@@ -113,9 +115,7 @@ def occurrence_detail(request, slug, pk, show_attending=True, *args, **kwargs):
         form = forms.AttendanceForm(request.POST, instance=attendance)
         if form.is_valid():
             form.save()
-            return http.HttpResponseRedirect(
-                reverse("occurrence-detail", args=(slug, pk))
-            )
+            return http.HttpResponseRedirect(request.get_full_path())
     else:
         form = forms.AttendanceForm(instance=attendance)
 
@@ -136,12 +136,12 @@ def occurrence_detail(request, slug, pk, show_attending=True, *args, **kwargs):
 
 @decorators.get_occurrence_data_from_session
 def confirm_occurrences(request, event, valid_occurrences, invalid_occurrences,
-                        next_url,
-                        FormClass=forms.ConfirmOccurrenceForm,
+                        next_url, FormClass=forms.ConfirmOccurrenceForm,
                         check_add_occurrences=defaults.add_occurrence_permission_check,
-                        *args, **kwargs):
+                        event_detail_url_name='event-detail', *args, **kwargs):
 
-    next = next_url or reverse('event-detail', args=[event.slug])
+    next = next_url or reverse(event_detail_url_name, args=[event.slug])
+
     if not check_add_occurrences(request):
         return http.HttpResponseRedirect(next)
 
@@ -156,7 +156,7 @@ def confirm_occurrences(request, event, valid_occurrences, invalid_occurrences,
                     'invalid_occurrences': form.invalid_occurrences,
                 }
                 request.session['occurrence_info'] = session_data
-                return http.HttpResponseRedirect(reverse('confirm-occurrences'))
+                return http.HttpResponseRedirect(request.get_full_path())
             form.save()
             request.session.pop('occurrence_info', None)
             return http.HttpResponseRedirect(next)
