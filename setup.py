@@ -27,7 +27,7 @@ setup(
     license='BSD',
     packages=find_packages(exclude=['test_project*']),
     install_requires=[
-        #'Django>=1.5', # Waiting for official release
+        'Django>=1.5',
         'django-threaded-multihost==2.0',
         'django-extensions==1.0.1',
         'django-extensions==1.0.1',
