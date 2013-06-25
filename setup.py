@@ -28,7 +28,7 @@ setup(
     packages=find_packages(exclude=['test_project*']),
     install_requires=[
         'Django>=1.5',
-        'django-threaded-multihost==2.0',
+        'django-threaded-multihost==2.1',
         'django-extensions==1.1.1',
         'python-dateutil==2.1',
         'django-timezones==0.2',
