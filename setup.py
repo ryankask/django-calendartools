@@ -36,7 +36,7 @@ setup(
         'django-model-utils>=1.2.0',
     ],
     dependency_links=[
-        'https://github.com/languagelab/django-threaded-multihost/tarball/master#egg=django-threaded-multihost-2.0'
+        'https://github.com/languagelab/django-threaded-multihost/tarball/master#egg=django-threaded-multihost-2.1'
     ],
     include_package_data=True,
     zip_safe=False,
